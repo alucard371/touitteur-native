@@ -1,10 +1,18 @@
 import React from "react";
 import PropTYpes from "prop-types";
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity }from 'react-native';
+import { Speech } from 'expo';
+import {httpAddLike} from "../API/TouitApi";
 
 
 class Touit extends React.Component{
 
+    constructor(props){
+        super(props);
+        this.state = {
+            nbLikes : props.likes
+        }
+    }
     
     static defaultProps = {
 
@@ -17,13 +25,50 @@ class Touit extends React.Component{
        name: PropTYpes.string,
     }
 
+
+    
+    
     render() {
-        const { message, name } = this.props;
+        const { message, name, ts, ip, comments_count, id, nbSpam } = this.props;
+        const { nbLikes } = this.state;
+
+    
+       
+        
+
         return (
-            <View style={[styleTouit.container]}>
-                <Text style={styleTouit.defaultText}>{message}</Text>
-                <Text style={[styleTouit.touitTextRight]}>{name}</Text>
-            </View>
+            <TouchableOpacity
+
+            onPress={
+                () =>{
+                    let { nbLikes } = this.state;
+                    httpAddLike(id, () => null);
+                    this.setState({
+                        nbLikes: nbLikes + 1
+                    })
+                    Speech.stop()
+                    Speech.speak(
+                    `${name} à dis : ${message}`,
+                    {
+                    language: 'fr-FR',
+                    pitch: 2
+                    }
+                    )
+                }
+
+            }
+        
+        style={[styleTouit.container]}>
+            <Text style={styleTouit.defaultText} >{message}</Text>
+            <Text style={[styleTouit.touitTextRight]}>{name}</Text>
+            <Text>timestamp : {ts}</Text>
+            <Text>ip : {ip}</Text>
+            <Text>likes : {nbLikes}</Text>
+            <Text>comments : {comments_count}</Text>
+            <Text>id : {id}</Text>
+            <Text>nbSpam : {nbSpam}</Text>
+
+        </TouchableOpacity>
         )
     }
 }
@@ -61,8 +106,7 @@ const styleTouit = StyleSheet.create({
     },
     buttonText:{
 
-    }
-   
+    } 
 })
 
 export default Touit;

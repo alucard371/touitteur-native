@@ -8,8 +8,9 @@ import Footer from './components/Footer';
 import { Font } from 'expo';
 
 
+
 export default class App extends React.Component {
-  
+ 
   state = {
     fontLoaded: false,
   };
@@ -28,24 +29,12 @@ export default class App extends React.Component {
     return (
       <View style={styles.container}>
         <Title/>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-  {
-    this.state.fontLoaded ? (
-      <Text style={{ fontFamily: 'Baloo', fontSize: 10 }}>
-        Hello, world!
-      </Text>
-    ) : null
-  }
-</View>
         <ScrollView>
           <SendMessageForm/>
           <TouitContainer/>
           <TrendContainer/>
           <Footer/>
         </ScrollView>
-        
-
-        
       </View>
     );
   }

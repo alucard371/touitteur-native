@@ -1,24 +1,79 @@
 import React, { Component } from "react";
 import {httpGetMessages} from "../API/TouitApi";
 import Touit from "./Touit";
-import {StyleSheet, FlatList, View, ScrollView, TouchableHighlight, Text} from 'react-native';
+import {StyleSheet, FlatList, View, ScrollView, TouchableHighlight, Text, ActivityIndicator, AppRegistry } from 'react-native';
+import { Font, Notifications, Permissions } from 'expo';
 
 class TouitContainer extends Component {
 
-
+    askPermissions = async () => {
+        const { status: existingStatus } = await Permissions.getAsync(
+          Permissions.NOTIFICATIONS
+        );
+        let finalStatus = existingStatus;
+        if (existingStatus !== "granted") {
+          const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+          finalStatus = status;
+        }
+        if (finalStatus !== "granted") {
+          return false;
+        }
+        return true;
+      };
+    
+      sendNotificationImmediately = async () => {
+        let notificationId = await Notifications.presentLocalNotificationAsync({
+          title: "Are you there ???",
+          body: "Nouveau message"
+        });
+        console.log(notificationId); // can be saved in AsyncStorage or send to server
+      };
+    state = {
+        fontLoaded: false,
+      };
+    
+      async componentDidMount() {
+        await Font.loadAsync({
+          'Baloo': require('../assets/fonts/BalooBhai-Regular.ttf'),
+        
+          'Stylish': require('../assets/fonts/Stylish-Regular.ttf'),
+        });
+    
+        this.setState({ fontLoaded: true });
+      }
 
     constructor(props) {
         super(props);
         this.state = {
         touits : [],
-        count : 0, 
+        count : 0,
+        ts:0,
         };
-        }
+    }
 
     refresh (){
-        httpGetMessages(this.state.count,(response) => {
+        let { ts, touits } = this.state;
+        httpGetMessages(ts, (response) => {
+            ts = response.ts;
+            touits = response.messages.reverse().concat(touits)
+
+
+            touits = touits.filter( (touit, index, list) => {
+                let next = list[index+1];
+                if (next && (touit.message == next.message && touit.name == next.name)){
+                    if(touit.nbSpam){
+                        next.nbSpam = touit.nbSpam + 1;
+                    } else {
+                        next.nbSpam = 2
+                    }
+                    return false;
+                }
+                return true;
+            })
+            
             this.setState({
-                touits: response.messages.reverse().slice(this.state.count,this.state.count+10),
+                touits: touits,
+                ts: ts,
             });
         })
     }
@@ -53,20 +108,43 @@ class TouitContainer extends Component {
         }
     }
 
+    renderMore = () => {
+        if (this.state.count <= (this.state.count+10)){
+            return (<TouchableHighlight
+                style={styleContainerTouit.button}
+                onPress={this.onPressMore}>
+                <Text style={styleContainerTouit.buttonText}>Newer</Text>
+            </TouchableHighlight>)
+        }
+      
+    }
+
+    loading = () => {
+        if (this.state.touits <= 0){
+            return (
+            <View style={ styleContainerTouit.horizontal}>
+                <ActivityIndicator size="large" color="#0000ff" />
+           </View>)
+        }
+    }
+
+    showActivity = () => {
+        if (this.state.count > 0){   
+    }}
+
     render() {
-        const {touits, count} = this.state;
+        const {touits} = this.state;
+        
         return (
              <View style={styleContainerTouit.container}>
                 <ScrollView style={styleContainerTouit.scroll}>
-                <TouchableHighlight
-                    style={styleContainerTouit.button}
-                    onPress={this.onPressMore}>
-                    <Text style={styleContainerTouit.buttonText}>Newer</Text>
-                </TouchableHighlight>
+                {this.renderMore()}
+                {this.loading()}
+                
                 <FlatList
-            data={touits}
+            data={touits.slice(this.state.count, this.state.count+10)}
             keyExtractor={
-              (item, index) => index.toString()
+              (item, index) => item.id.toString()
             }
             renderItem={({item}) => {
               return (<Touit {...item} />)
@@ -123,8 +201,14 @@ const styleContainerTouit = StyleSheet.create({
     },
     scroll:{
         width: "100%",
-    }
+    },
+    horizontal: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        padding: 10
+      }
    
 })
 
+AppRegistry.registerComponent('App', () => App)
 export default TouitContainer;

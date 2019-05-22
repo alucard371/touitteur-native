@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { httpGetTrends } from "../API/TouitApi";
 import Trend from "./Trend";
-import {StyleSheet, FlatList, View, ScrollView, Text} from 'react-native';
+import {StyleSheet, View, ScrollView, Text} from 'react-native';
 
 
 class TrendContainer extends Component {
@@ -35,7 +35,7 @@ class TrendContainer extends Component {
         
         const { listTrends } = this.state;
         return(
-          <View>
+          <View  style={styleContainerTrend.container}>
             <ScrollView contentContainerStyle={styleContainerTrend.container}>
                 {listTrends.sort((a,b) => b[0] - a[0]).map((item, index) =>
                 <Trend
@@ -52,19 +52,22 @@ class TrendContainer extends Component {
 
     const styleContainerTrend = StyleSheet.create({
         container:{
-            borderWidth: 4,
-            borderRadius: 6,
-            alignItems: "center",
-            borderColor: '#D93B18',
-            width: "100%",
-            borderRadius: 10,
-            backgroundColor: "#fff",
-            padding:10,
             flex: 1,
             marginBottom: 10,
             flexDirection: 'row',
             flexWrap: 'wrap',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            borderWidth: 4,
+            alignItems: "center",
+            borderColor: '#D93B18',
+            width: "100%",
+            borderRadius: 10,
+            marginVertical: 20,
+            backgroundColor: "#fff",
+            padding:10,
+            alignItems: "center",
+            borderColor: '#D93B18',
+            width: "100%",
         },
         defaultText:{
             alignItems: 'center',
