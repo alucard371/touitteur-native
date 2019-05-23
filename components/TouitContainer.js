@@ -51,12 +51,13 @@ class TouitContainer extends Component {
         };
     }
 
+
+
     refresh (){
         let { ts, touits } = this.state;
         httpGetMessages(ts, (response) => {
             ts = response.ts;
-            touits = response.messages.reverse().concat(touits)
-
+            touits = response.messages.reverse().concat(touits);
 
             touits = touits.filter( (touit, index, list) => {
                 let next = list[index+1];
