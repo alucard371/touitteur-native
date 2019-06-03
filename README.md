@@ -1,6 +1,3 @@
-# touitteur-native
-
-
 # Touitteur-native
 
 > A twitter-like application écrite avec le framework react-native 
